@@ -41,16 +41,32 @@ let IssuerIdentificationNumber = {
     4556: () => 'Visa',
 }
 
+let IssuerInitials = {
+    AE: () => [3400, 3700],
+    DCI: () => [3090, 3600, 3800, 3900],
+    DC: () => [6500],
+    MS: () => [5018, 5020, 5038],
+    MC: () => [5000, 5400, 1900],
+    VS: () => [4024, 4532, 4556],
+}
+
 function verify_cc(number){
     if(typeof(number) != "number"){
         console.log(`[Type error] credit number is not a number`)
         return;
-    } 
+    }
+    if(number >= 1 * 10**16 ) {
+        // Erro no método toString(), programa só aceita cadeia de caracteres abaixo de 16 (have to fix)
+        console.log('[Input error] maxNumber have to be lower than 16 digits')
+        return;
+    }
     
     createArray(number)
+    let verificationDigit = arrayCredit[arrayCredit.length-1];
+    console.log(arrayCredit)
 
-    if(!checkLastDigit()) {
-        console.log('[Validation error] Luhn algorithm failed')
+    if(!checkLastDigit(verificationDigit)) {
+        console.log('[Validation error] Luhn algorithm failed, ' + verificationDigit + ' is not acceptaple')
         reset()
         return;
     }
@@ -62,10 +78,47 @@ function verify_cc(number){
     let IndustryCategory = MajorIndustryIndentifier[stringCategoryID];
 
     let result = `${IssuerCompany} , ${IndustryCategory}`;
-    console.log(result)
 
     reset();
-    return;
+    return result;
+}
+
+function create_cc(inputInitials, maxNumber){
+    if(maxNumber >= 1 * 10**16 ) {
+        // Erro no método toString(), programa só aceita cadeia de caracteres abaixo de 16 (have to fix)
+        console.log('[Input error] maxNumber have to be lower than 16 digits')
+        return;
+    }
+    if(IssuerInitials[inputInitials] == null) {
+        console.log('[Input error] issuer initial dosen\'t exist')
+    }
+    else{
+        let randomStringNumber = '';
+        let randomStringIIN = IssuerInitials[inputInitials]()[Math.floor(Math.random() * (IssuerInitials[inputInitials]().length - 0)) + 0].toString(10);
+
+        for(let i=0; i < maxNumber - 5; i++){
+            randomStringNumber += Math.floor(Math.random() * 9).toString(10);
+        }
+        let lastDigit = createLastDigit(randomStringIIN + randomStringNumber);
+        return parseInt(randomStringIIN + randomStringNumber + lastDigit);
+    }
+}
+
+function createLastDigit(string){
+    createArray(string);
+    let randomLastDigit = 0;
+    do{
+        randomLastDigit = Math.floor(Math.random() * (9 - 0) + 0);
+        arrayCredit.push(randomLastDigit)
+        if(checkLastDigit(randomLastDigit)){
+            console.log(arrayCredit)
+            reset()
+            return randomLastDigit;
+        }
+        else{
+            arrayCredit.pop()
+        }
+    } while(!checkLastDigit(randomLastDigit));
 }
 
 function createArray(number){
@@ -75,10 +128,8 @@ function createArray(number){
     }
 }
 
-function checkLastDigit(){
+function checkLastDigit(verifDigit){
     let sumResult = 0;
-    let verificationDigit = arrayCredit[arrayCredit.length - 1];
-    
     for(let i=2; i <= arrayCredit.length; i++){
         let number =  arrayCredit[arrayCredit.length - i];
 
@@ -98,8 +149,11 @@ function checkLastDigit(){
         }
     }
 
-    if( (sumResult + verificationDigit) %10 === 0){
+    if( (sumResult + verifDigit) %10 === 0){
         return true;
+    }
+    else{
+        return false;
     }
 }   
 
