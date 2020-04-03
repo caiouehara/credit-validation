@@ -1,4 +1,4 @@
-let creditNumberArray = [];
+let arrayCredit = [];
 
 let MajorIndustryIndentifier = {
     1: () => 'Companias aérias',
@@ -12,7 +12,7 @@ let MajorIndustryIndentifier = {
     9: () => 'Atribuições Nacionais',
 }
 
-let cardNetworkIDs = {
+let IssuerIdentificationNumber = {
     3400: () => 'American Express',
     3700: () => 'American Express',
 
@@ -41,53 +41,68 @@ let cardNetworkIDs = {
     4556: () => 'Visa',
 }
 
-function verify_cc(creditNumber, creditInstance){
-    if(typeof(creditNumber) != "string") console.log(`[Type error] credit number is not a string`)
+function verify_cc(number){
+    if(typeof(number) != "number"){
+        console.log(`[Type error] credit number is not a number`)
+        return;
+    } 
+    
+    createArray(number)
 
-    createArray(creditNumber)
     if(!checkLastDigit()) {
         console.log('[Validation error] Luhn algorithm failed')
-        creditNumberArray = [];
+        reset()
         return;
     }
         
+    let stringIssuerID = arrayCredit[0].toString(10) + arrayCredit [1].toString(10) + arrayCredit[2].toString(10) + arrayCredit[3].toString(10);
+    let stringCategoryID = arrayCredit[0].toString(10);
 
-    cardID = cardNetworkIDs[creditNumberArray[0] + creditNumberArray [1] + creditNumberArray[2] + creditNumberArray[3]];
-    MII = MajorIndustryIndentifier[creditNumberArray[0]];
-    let INN = `${cardID} , ${MII}`;
-    console.log(INN)
+    let IssuerCompany = IssuerIdentificationNumber[stringIssuerID];
+    let IndustryCategory = MajorIndustryIndentifier[stringCategoryID];
 
-    creditNumberArray = [];
+    let result = `${IssuerCompany} , ${IndustryCategory}`;
+    console.log(result)
+
+    reset();
+    return;
 }
 
-
-function createArray(creditNumber){
-    for(let i=0; i < creditNumber.length; i++){
-        creditNumberArray.push(creditNumber.charAt(i))
+function createArray(number){
+    let stringCredit = number.toString(10);
+    for(let i=0; i < stringCredit.length; i++){
+        arrayCredit.push(parseInt(stringCredit.charAt(i)))
     }
 }
 
 function checkLastDigit(){
-    let result = 0;
-    let verifDigit = parseInt(creditNumberArray[creditNumberArray.length-1]);
-    for(let i=2; i <= creditNumberArray.length; i++){
-        number = parseInt(creditNumberArray[creditNumberArray.length-i]);
+    let sumResult = 0;
+    let verificationDigit = arrayCredit[arrayCredit.length - 1];
+    
+    for(let i=2; i <= arrayCredit.length; i++){
+        let number =  arrayCredit[arrayCredit.length - i];
+
         // pos par
-        // console.log((creditNumberArray.length-i) %2);
-        if((creditNumberArray.length-i) %2 === 1){
-            result += number;
+        if( (arrayCredit.length - i) %2 === 1){
+            sumResult += number;
         }
+
         // pos impar 
         else{
             if(number*2 > 9){
-                result += number*2 -9;
+                sumResult += number*2 -9;
             }
             else {
-                result += number*2;
+                sumResult += number*2;
             }
         }
     }
-    if((result + verifDigit)%10 === 0){
+
+    if( (sumResult + verificationDigit) %10 === 0){
         return true;
     }
 }   
+
+function reset(){
+    arrayCredit = [];
+}
