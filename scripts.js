@@ -1,5 +1,22 @@
 let arrayCredit = [];
 
+const cardController = {
+    options: ['Visa', 'Visa Electron', 'Master Card', 'Maestro', 'Discover Card', 'Dinner Club Internacional', 'American Express'],
+    get(name){
+        let ids = [];
+        for(let cardID in IssuerIdentificationNumber){
+            if(name === IssuerIdentificationNumber[cardID]()){
+                ids.push(cardID)
+            }
+        }
+        return [name, ids];
+    },
+    // one ideia ...
+    // register(name, ids){
+    //     let newIssuerIdentificationNumber;
+    // }
+}
+
 let MajorIndustryIndentifier = {
     1: () => 'Companias aérias',
     2: () => 'Companias aérias e outras tarefas futuras da indústria',
